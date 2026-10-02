@@ -26,13 +26,13 @@ canvas { max-height: 260px; }
 <body>
 <h1>💪 w-log dashboard</h1>
 <div class="sub">Workouts from Notion w-log · synced from Apple Watch · updated daily</div>
-<p class="muted">No workouts synced yet — once your watch shares workout data, this dashboard fills in automatically.</p>
+
 
 <div class="grid">
-  <div class="card"><div class="v">0</div><div class="l">workouts logged</div></div>
-  <div class="card"><div class="v">0</div><div class="l">total lbs lifted</div></div>
+  <div class="card"><div class="v">8</div><div class="l">workouts logged</div></div>
+  <div class="card"><div class="v">80,354</div><div class="l">total lbs lifted</div></div>
   <div class="card"><div class="v">0</div><div class="l">total calories</div></div>
-  <div class="card"><div class="v">0.0</div><div class="l">active hours</div></div>
+  <div class="card"><div class="v">5.4</div><div class="l">active hours</div></div>
   <div class="card"><div class="v">0</div><div class="l">PR days 🏆</div></div>
 </div>
 
@@ -55,14 +55,14 @@ const opts = { plugins: { legend: { display: false } },
 const mk = (id, type, labels, data, color, extra={}) => new Chart(document.getElementById(id),
   { type, data: { labels, datasets: [Object.assign({ data, backgroundColor: color, borderColor: color, fill: type==='line' ? false : true, tension: .25, pointRadius: 3 }, extra)] },
      options: type==='doughnut' ? { plugins: { legend: { display: true, labels: { color: tick } } } } : opts });
-mk('cVol','line',[],[],'#ff5d5d');
-mk('cMG','bar',[],[],'#b388ff');
-mk('cDur','line',[],[],'#4da3ff');
-mk('cFreq','bar',[],[],'#37c871');
-mk('cCal','bar',[],[],'#ff9f43');
-mk('cHr','line',[],[],'#ff6ec7');
+mk('cVol','line',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[19740, 9130, 8954, 4350, 9525, 10815, 8760, 9080],'#ff5d5d');
+mk('cMG','bar',["[\"Legs\"]", "[\"Arms\"", "\"Back\"]", "[\"Chest\"", "\"Arms\"]", "[\"Shoulders\"", "\"Core\"]"],[29265, 13485, 13485, 9884, 9884, 2175, 2175],'#b388ff');
+mk('cDur','line',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[53.6, 24.2, 61.9, 35.7, 45.5, 44.5, 35.4, 22.8],'#4da3ff');
+mk('cFreq','bar',["W35", "W36", "W38"],[4, 3, 1],'#37c871');
+mk('cCal','bar',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[0, 0, 0, 0, 0, 0, 0, 0],'#ff9f43');
+mk('cHr','line',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[null, null, null, null, null, null, null, null],'#ff6ec7');
 new Chart(document.getElementById('cMix'), { type: 'doughnut',
-  data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+  data: { labels: ["Strength Training"], datasets: [{ data: [8], backgroundColor: ["#ff5d5d"] }] },
   options: { plugins: { legend: { display: true, labels: { color: tick } } } } });
 </script>
 </body>
