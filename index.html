@@ -21,49 +21,66 @@ h1 { font-size: 1.4rem; margin: 0 0 4px; }
 canvas { max-height: 260px; }
 .muted { color: #9a9aa5; }
 .section { font-size: 1.1rem; margin: 22px 0 10px; }
+.err { background: #3a1f24; border: 1px solid #7a2e35; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
 </style>
 </head>
 <body>
-<h1>💪 w-log dashboard</h1>
-<div class="sub">Workouts from Notion w-log · synced from Apple Watch · updated daily</div>
-
+<h1>&#x1F4AA; w-log dashboard</h1>
+<div class="sub">Workouts from Notion w-log &middot; synced from Apple Watch &middot; updated daily</div>
+<div id="err"></div>
+<div id="emptyNote"></div>
 
 <div class="grid">
-  <div class="card"><div class="v">8</div><div class="l">workouts logged</div></div>
-  <div class="card"><div class="v">80,354</div><div class="l">total lbs lifted</div></div>
-  <div class="card"><div class="v">1,011</div><div class="l">total calories</div></div>
-  <div class="card"><div class="v">5.4</div><div class="l">active hours</div></div>
-  <div class="card"><div class="v">0</div><div class="l">PR days 🏆</div></div>
+  <div class="card"><div class="v" id="stN">&ndash;</div><div class="l">workouts logged</div></div>
+  <div class="card"><div class="v" id="stVol">&ndash;</div><div class="l">total lbs lifted</div></div>
+  <div class="card"><div class="v" id="stKcal">&ndash;</div><div class="l">total calories</div></div>
+  <div class="card"><div class="v" id="stHrs">&ndash;</div><div class="l">active hours</div></div>
+  <div class="card"><div class="v" id="stPr">&ndash;</div><div class="l">PR days &#x1F3C6;</div></div>
 </div>
 
 <div class="section">Progress</div>
-<div class="panel"><h2>Strength volume over time</h2><p class="desc">lbs per session — climbing means progressive overload is working</p><canvas id="cVol"></canvas></div>
-<div class="panel"><h2>Volume by muscle group</h2><p class="desc">total lbs — spot imbalances at a glance</p><canvas id="cMG"></canvas></div>
+<div class="panel"><h2>Strength volume over time</h2><p class="desc">lbs per session &mdash; climbing means progressive overload is working</p><canvas id="cVol"></canvas></div>
+<div class="panel"><h2>Volume by muscle group</h2><p class="desc">total lbs &mdash; spot imbalances at a glance</p><canvas id="cMG"></canvas></div>
 <div class="panel"><h2>Duration per workout</h2><p class="desc">minutes</p><canvas id="cDur"></canvas></div>
 
 <div class="section">Overall fitness</div>
 <div class="panel"><h2>Workouts per week</h2><p class="desc">consistency is the whole game</p><canvas id="cFreq"></canvas></div>
 <div class="panel"><h2>Calories per workout</h2><canvas id="cCal"></canvas></div>
-<div class="panel"><h2>Avg heart rate per workout</h2><p class="desc">bpm — same effort at lower HR means a fitter heart</p><canvas id="cHr"></canvas></div>
+<div class="panel"><h2>Avg heart rate per workout</h2><p class="desc">bpm &mdash; same effort at lower HR means a fitter heart</p><canvas id="cHr"></canvas></div>
 <div class="panel"><h2>Workout mix</h2><canvas id="cMix"></canvas></div>
 
 <script>
 const grid = 'rgba(255,255,255,.08)', tick = '#9a9aa5';
 const opts = { plugins: { legend: { display: false } },
   scales: { x: { ticks: { color: tick, maxRotation: 45 }, grid: { color: grid } },
-             y: { ticks: { color: tick }, grid: { color: grid } } } };
-const mk = (id, type, labels, data, color, extra={}) => new Chart(document.getElementById(id),
-  { type, data: { labels, datasets: [Object.assign({ data, backgroundColor: color, borderColor: color, fill: type==='line' ? false : true, tension: .25, pointRadius: 3 }, extra)] },
-     options: type==='doughnut' ? { plugins: { legend: { display: true, labels: { color: tick } } } } : opts });
-mk('cVol','line',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[19740, 9130, 8954, 4350, 9525, 10815, 8760, 9080],'#ff5d5d');
-mk('cMG','bar',["[\"Legs\"]", "[\"Biceps\"", "\"Back\"]", "[\"Chest\"", "\"Triceps\"]", "[\"Shoulders\"", "\"Core\"]"],[29265, 13485, 13485, 9884, 9884, 2175, 2175],'#b388ff');
-mk('cDur','line',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[53.6, 24.2, 61.9, 35.7, 45.5, 44.5, 35.4, 22.8],'#4da3ff');
-mk('cFreq','bar',["W35", "W36", "W38"],[4, 3, 1],'#37c871');
-mk('cCal','bar',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[148, 66, 239, 87, 151, 145, 117, 58],'#ff9f43');
-mk('cHr','line',["08-24", "08-25", "08-26", "08-27", "08-31", "09-01", "09-02", "09-15"],[null, null, null, null, null, null, null, null],'#ff6ec7');
-new Chart(document.getElementById('cMix'), { type: 'doughnut',
-  data: { labels: ["Strength Training"], datasets: [{ data: [8], backgroundColor: ["#ff5d5d"] }] },
-  options: { plugins: { legend: { display: true, labels: { color: tick } } } } });
+            y: { ticks: { color: tick }, grid: { color: grid } } } };
+const mk = (id, type, labels, data, color) => new Chart(document.getElementById(id),
+  { type, data: { labels, datasets: [{ data, backgroundColor: color, borderColor: color, fill: type==='line' ? false : true, tension: .25, pointRadius: 3 }] }, options: opts });
+const set = (id, v) => { document.getElementById(id).textContent = v; };
+const fmtN = n => Number(n).toLocaleString('en-US');
+
+fetch('data.json?t=' + Date.now())
+  .then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+  .then(d => {
+    const s = d.stats;
+    set('stN', s.n); set('stVol', fmtN(s.total_vol)); set('stKcal', fmtN(s.total_kcal));
+    set('stHrs', s.total_hours); set('stPr', s.pr_count);
+    if (s.n === 0) document.getElementById('emptyNote').innerHTML =
+      '<p class="muted">No workouts synced yet &mdash; once your watch shares workout data, this dashboard fills in automatically.</p>';
+    mk('cVol','line',d.sv_labels,d.sv_vol,'#ff5d5d');
+    mk('cMG','bar',d.mg_labels,d.mg_vals,'#b388ff');
+    mk('cDur','line',d.w_labels,d.w_dur,'#4da3ff');
+    mk('cFreq','bar',d.wk_labels,d.wk_counts,'#37c871');
+    mk('cCal','bar',d.w_labels,d.w_cal,'#ff9f43');
+    mk('cHr','line',d.w_labels,d.w_hr,'#ff6ec7');
+    new Chart(document.getElementById('cMix'), { type: 'doughnut',
+      data: { labels: d.tm_labels, datasets: [{ data: d.tm_vals, backgroundColor: d.tm_colors }] },
+      options: { plugins: { legend: { display: true, labels: { color: tick } } } } });
+  })
+  .catch(e => {
+    document.getElementById('err').innerHTML =
+      '<div class="err">Couldn\u2019t load fresh data &mdash; showing nothing instead of stale numbers.</div>';
+  });
 </script>
 </body>
 </html>
