@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>W-Log Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #101014; color: #e8e8ec; padding: 16px; }
+h1 { font-size: 1.4rem; margin: 0 0 4px; }
+.sub { color: #9a9aa5; font-size: .85rem; margin-bottom: 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.card { background: #1a1a21; border: 1px solid #2a2a35; border-radius: 12px; padding: 12px 14px; }
+.card .v { font-size: 1.5rem; font-weight: 700; }
+.card .l { color: #9a9aa5; font-size: .75rem; margin-top: 2px; }
+.panel { background: #1a1a21; border: 1px solid #2a2a35; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+.panel h2 { font-size: 1rem; margin: 0 0 4px; }
+.panel p.desc { color: #9a9aa5; font-size: .8rem; margin: 0 0 10px; }
+canvas { max-height: 260px; }
+.muted { color: #9a9aa5; }
+.section { font-size: 1.1rem; margin: 22px 0 10px; }
+</style>
+</head>
+<body>
+<h1>💪 W-Log Dashboard</h1>
+<div class="sub">Workouts from Notion w-log · synced from Apple Watch · refreshed every Friday</div>
+<p class="muted">No workouts synced yet — once your watch shares workout data, this dashboard fills in automatically.</p>
+
+<div class="grid">
+  <div class="card"><div class="v">0</div><div class="l">workouts logged</div></div>
+  <div class="card"><div class="v">0</div><div class="l">total lbs lifted</div></div>
+  <div class="card"><div class="v">0</div><div class="l">total calories</div></div>
+  <div class="card"><div class="v">0.0</div><div class="l">active hours</div></div>
+  <div class="card"><div class="v">0</div><div class="l">PR days 🏆</div></div>
+</div>
+
+<div class="section">Progress</div>
+<div class="panel"><h2>Strength volume over time</h2><p class="desc">lbs per session — climbing means progressive overload is working</p><canvas id="cVol"></canvas></div>
+<div class="panel"><h2>Volume by muscle group</h2><p class="desc">total lbs — spot imbalances at a glance</p><canvas id="cMG"></canvas></div>
+<div class="panel"><h2>Duration per workout</h2><p class="desc">minutes</p><canvas id="cDur"></canvas></div>
+
+<div class="section">Overall fitness</div>
+<div class="panel"><h2>Workouts per week</h2><p class="desc">consistency is the whole game</p><canvas id="cFreq"></canvas></div>
+<div class="panel"><h2>Calories per workout</h2><canvas id="cCal"></canvas></div>
+<div class="panel"><h2>Avg heart rate per workout</h2><p class="desc">bpm — same effort at lower HR means a fitter heart</p><canvas id="cHr"></canvas></div>
+<div class="panel"><h2>Workout mix</h2><canvas id="cMix"></canvas></div>
+
+<script>
+const grid = 'rgba(255,255,255,.08)', tick = '#9a9aa5';
+const opts = { plugins: { legend: { display: false } },
+  scales: { x: { ticks: { color: tick, maxRotation: 45 }, grid: { color: grid } },
+             y: { ticks: { color: tick }, grid: { color: grid } } } };
+const mk = (id, type, labels, data, color, extra={}) => new Chart(document.getElementById(id),
+  { type, data: { labels, datasets: [Object.assign({ data, backgroundColor: color, borderColor: color, fill: type==='line' ? false : true, tension: .25, pointRadius: 3 }, extra)] },
+     options: type==='doughnut' ? { plugins: { legend: { display: true, labels: { color: tick } } } } : opts });
+mk('cVol','line',[],[],'#ff5d5d');
+mk('cMG','bar',[],[],'#b388ff');
+mk('cDur','line',[],[],'#4da3ff');
+mk('cFreq','bar',[],[],'#37c871');
+mk('cCal','bar',[],[],'#ff9f43');
+mk('cHr','line',[],[],'#ff6ec7');
+new Chart(document.getElementById('cMix'), { type: 'doughnut',
+  data: { labels: [], datasets: [{ data: [], backgroundColor: [] }] },
+  options: { plugins: { legend: { display: true, labels: { color: tick } } } } });
+</script>
+</body>
+</html>
