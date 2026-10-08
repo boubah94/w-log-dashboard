@@ -19,6 +19,7 @@ h1 { font-size: 1.4rem; margin: 0 0 4px; }
 .panel h2 { font-size: 1rem; margin: 0 0 4px; }
 .panel p.desc { color: #9a9aa5; font-size: .8rem; margin: 0 0 10px; }
 canvas { max-height: 260px; }
+select { background: #101014; color: #e8e8ec; border: 1px solid #2a2a35; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-size: .9rem; max-width: 100%; }
 .muted { color: #9a9aa5; }
 .section { font-size: 1.1rem; margin: 22px 0 10px; }
 .err { background: #3a1f24; border: 1px solid #7a2e35; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
@@ -33,6 +34,7 @@ canvas { max-height: 260px; }
 <div class="grid">
   <div class="card"><div class="v" id="stN">&ndash;</div><div class="l">workouts logged</div></div>
   <div class="card"><div class="v" id="stVol">&ndash;</div><div class="l">total lbs lifted</div></div>
+  <div class="card"><div class="v" id="stSets">&ndash;</div><div class="l">total sets</div></div>
   <div class="card"><div class="v" id="stKcal">&ndash;</div><div class="l">total calories</div></div>
   <div class="card"><div class="v" id="stHrs">&ndash;</div><div class="l">active hours</div></div>
   <div class="card"><div class="v" id="stPr">&ndash;</div><div class="l">PR days &#x1F3C6;</div></div>
@@ -40,6 +42,7 @@ canvas { max-height: 260px; }
 
 <div class="section">Progress</div>
 <div class="panel"><h2>Strength volume over time</h2><p class="desc">lbs per session &mdash; climbing means progressive overload is working</p><canvas id="cVol"></canvas></div>
+<div class="panel"><h2>Strength progression</h2><p class="desc">estimated 1RM per lift (Epley formula) &mdash; pick a lift, watch the line climb</p><select id="progSel"></select><canvas id="cProg"></canvas></div>
 <div class="panel"><h2>Volume by muscle group</h2><p class="desc">total lbs &mdash; spot imbalances at a glance</p><canvas id="cMG"></canvas></div>
 <div class="panel"><h2>Duration per workout</h2><p class="desc">minutes</p><canvas id="cDur"></canvas></div>
 
@@ -63,11 +66,27 @@ fetch('data.json?t=' + Date.now())
   .then(r => { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
   .then(d => {
     const s = d.stats;
-    set('stN', s.n); set('stVol', fmtN(s.total_vol)); set('stKcal', fmtN(s.total_kcal));
+    set('stN', s.n); set('stVol', fmtN(s.total_vol)); set('stSets', fmtN(s.total_sets || 0)); set('stKcal', fmtN(s.total_kcal));
     set('stHrs', s.total_hours); set('stPr', s.pr_count);
     if (s.n === 0) document.getElementById('emptyNote').innerHTML =
       '<p class="muted">No workouts synced yet &mdash; once your watch shares workout data, this dashboard fills in automatically.</p>';
     mk('cVol','line',d.sv_labels,d.sv_vol,'#ff5d5d');
+    const prog = d.prog || {};
+    const progNames = Object.keys(prog).sort((a,b) => prog[b].values.length - prog[a].values.length);
+    const progSel = document.getElementById('progSel');
+    progNames.forEach(n => { const o = document.createElement('option'); o.value = n;
+      o.textContent = n + ' (' + prog[n].values.length + ' sessions)'; progSel.appendChild(o); });
+    let progChart = null;
+    const drawProg = n => { const p = prog[n]; if (!p) return;
+      if (progChart) progChart.destroy();
+      progChart = new Chart(document.getElementById('cProg'), { type: 'line',
+        data: { labels: p.labels, datasets: [{ data: p.values, borderColor: '#ff5d5d',
+          backgroundColor: '#ff5d5d', tension: .25, pointRadius: 4 }] },
+        options: { plugins: { legend: { display: false } },
+          scales: { x: { ticks: { color: tick }, grid: { color: grid } },
+                    y: { ticks: { color: tick }, grid: { color: grid } } } } }); };
+    progSel.addEventListener('change', e => drawProg(e.target.value));
+    if (progNames.length) drawProg(progNames[0]);
     mk('cMG','bar',d.mg_labels,d.mg_vals,'#b388ff');
     mk('cDur','line',d.w_labels,d.w_dur,'#4da3ff');
     mk('cFreq','bar',d.wk_labels,d.wk_counts,'#37c871');
