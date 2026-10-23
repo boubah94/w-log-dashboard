@@ -8,19 +8,19 @@
 <style>
 :root { color-scheme: dark; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #101014; color: #e8e8ec; padding: 16px; }
+body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: #08080b; color: #e8e8ec; padding: 16px; }
 h1 { font-size: 1.4rem; margin: 0 0 4px; }
-.sub { color: #9a9aa5; font-size: .85rem; margin-bottom: 16px; }
+.sub { color: #8f8f9a; font-size: .85rem; margin-bottom: 16px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
-.card { background: #1a1a21; border: 1px solid #2a2a35; border-radius: 12px; padding: 12px 14px; }
-.card .v { font-size: 1.5rem; font-weight: 700; }
-.card .l { color: #9a9aa5; font-size: .75rem; margin-top: 2px; }
-.panel { background: #1a1a21; border: 1px solid #2a2a35; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+.card { background: #101016; border: 1px solid #262633; border-radius: 12px; padding: 12px 14px; }
+.card .v { font-size: 1.5rem; font-weight: 700; color: #f5b921; }
+.card .l { color: #8f8f9a; font-size: .75rem; margin-top: 2px; }
+.panel { background: #101016; border: 1px solid #262633; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
 .panel h2 { font-size: 1rem; margin: 0 0 4px; }
-.panel p.desc { color: #9a9aa5; font-size: .8rem; margin: 0 0 10px; }
+.panel p.desc { color: #8f8f9a; font-size: .8rem; margin: 0 0 10px; }
 canvas { max-height: 260px; }
-select { background: #101014; color: #e8e8ec; border: 1px solid #2a2a35; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-size: .9rem; max-width: 100%; }
-.muted { color: #9a9aa5; }
+select { background: #08080b; color: #e8e8ec; border: 1px solid #262633; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-size: .9rem; max-width: 100%; }
+.muted { color: #8f8f9a; }
 .section { font-size: 1.1rem; margin: 22px 0 10px; }
 .err { background: #3a1f24; border: 1px solid #7a2e35; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
 </style>
@@ -53,7 +53,7 @@ select { background: #101014; color: #e8e8ec; border: 1px solid #2a2a35; border-
 <div class="panel"><h2>Workout mix</h2><canvas id="cMix"></canvas></div>
 
 <script>
-const grid = 'rgba(255,255,255,.08)', tick = '#9a9aa5';
+const grid = 'rgba(255,255,255,.08)', tick = '#8f8f9a';
 const opts = { plugins: { legend: { display: false } },
   scales: { x: { ticks: { color: tick, maxRotation: 45 }, grid: { color: grid } },
             y: { ticks: { color: tick }, grid: { color: grid } } } };
@@ -70,7 +70,7 @@ fetch('data.json?t=' + Date.now())
     set('stHrs', s.total_hours); set('stPr', s.pr_count);
     if (s.n === 0) document.getElementById('emptyNote').innerHTML =
       '<p class="muted">No workouts synced yet &mdash; once your watch shares workout data, this dashboard fills in automatically.</p>';
-    mk('cVol','line',d.sv_labels,d.sv_vol,'#ff5d5d');
+    mk('cVol','line',d.sv_labels,d.sv_vol,'#f5b921');
     const prog = d.prog || {};
     const progNames = Object.keys(prog).sort((a,b) => prog[b].values.length - prog[a].values.length);
     const progSel = document.getElementById('progSel');
@@ -81,17 +81,17 @@ fetch('data.json?t=' + Date.now())
       if (progChart) progChart.destroy();
       progChart = new Chart(document.getElementById('cProg'), { type: 'line',
         data: { labels: p.labels, datasets: [{ data: p.values, borderColor: '#ff5d5d',
-          backgroundColor: '#ff5d5d', tension: .25, pointRadius: 4 }] },
+          backgroundColor: '#f5b921', tension: .25, pointRadius: 4 }] },
         options: { plugins: { legend: { display: false } },
           scales: { x: { ticks: { color: tick }, grid: { color: grid } },
                     y: { ticks: { color: tick }, grid: { color: grid } } } } }); };
     progSel.addEventListener('change', e => drawProg(e.target.value));
     if (progNames.length) drawProg(progNames[0]);
-    mk('cMG','bar',d.mg_labels,d.mg_vals,'#b388ff');
-    mk('cDur','line',d.w_labels,d.w_dur,'#4da3ff');
-    mk('cFreq','bar',d.wk_labels,d.wk_counts,'#37c871');
-    mk('cCal','bar',d.w_labels,d.w_cal,'#ff9f43');
-    mk('cHr','line',d.w_labels,d.w_hr,'#ff6ec7');
+    mk('cMG','bar',d.mg_labels,d.mg_vals,'#7d8ca3');
+    mk('cDur','line',d.w_labels,d.w_dur,'#5b8dd9');
+    mk('cFreq','bar',d.wk_labels,d.wk_counts,'#3fa46a');
+    mk('cCal','bar',d.w_labels,d.w_cal,'#e07b39');
+    mk('cHr','line',d.w_labels,d.w_hr,'#c94f6d');
     new Chart(document.getElementById('cMix'), { type: 'doughnut',
       data: { labels: d.tm_labels, datasets: [{ data: d.tm_vals, backgroundColor: d.tm_colors }] },
       options: { plugins: { legend: { display: true, labels: { color: tick } } } } });
